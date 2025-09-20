@@ -6,6 +6,81 @@
   
   <script>
 
+
+    const handleResponse = async (response, acceptedType)=>{
+      let resText = "";
+      if(acceptedType === 'application/json'){
+        const resObj=await response.json();
+        console.log(resObj);
+        resText=resObj.message;
+      }else if(acceptedType==='text/xml'){
+        resText=await response.text();
+        console.log(resText);
+        resText = resText.slice(0,resText.indexOf('<id>'));
+      }
+      
+      //let resObj=await response.json();
+
+      const contentType = response.headers.get('Content-Type')
+
+      const content = document.querySelector('#content');
+
+      switch(response.status){
+        case 200:
+          content.innerHTML = `<b>Success</b>`;
+          break;
+        case 400:
+          content.innerHTML =`<b>Bad Request</b>`
+          break;
+        case 401:
+          content.innerHTML =`<b>Unauthorized</b>`
+          break;
+        case 403:
+          content.innerHTML =`<b>Forbidden</b>`
+          break;
+        case 500:
+          content.innerHTML =`<b>Internal Server Error</b>`
+          break;
+        case 501:
+          content.innerHTML =`<b>Not Implemented</b>`
+          break;
+        default:
+          content.innerHTML = `Error code not implemented by client.`;
+          break;
+      }
+      content.innerHTML += `<p>Message: ${resText}</p>`
+    };
+
+
+      const sendFetchRequest = async ()=>{
+        const url = document.querySelector('#page').value;
+        const acceptedType = document.querySelector('#type').value;
+
+        const options ={
+          method:'GET',
+          headers:{'Accept': acceptedType}
+        }
+        
+
+        let response = await fetch(url, options);
+
+        handleResponse(response, acceptedType);
+
+      }
+
+
+    const init =()=>{
+      const send = document.querySelector('#send');
+      const getPage = (e)=>{
+        e.preventDefault();
+        sendFetchRequest();
+        return false;
+      }
+
+      send.addEventListener('click',getPage);
+    };
+
+    window.onload=init;
   </script>
 </head>
 <body>
