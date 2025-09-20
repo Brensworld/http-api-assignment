@@ -1,4 +1,6 @@
 const respond = (request, response, status, object, type) => {
+  //putting the object into a new variable to be changed
+  //eslint doesn't like it when parameters are changed
   let content = object;
   if (type === 'application/json') {
     content = JSON.stringify(object);
@@ -15,10 +17,12 @@ const respond = (request, response, status, object, type) => {
   response.end();
 };
 
+
 const success = (request, response) => {
   const responseJSON = {
     message: 'This is a successful response',
   };
+
 
   if (request.headers.accept === 'text/xml') {
     let responseXML = '<response>';
@@ -34,24 +38,17 @@ const success = (request, response) => {
 };
 
 const badRequest = (request, response) => {
+  //setting up response and checking if the valid param is true
   const responseJson = {};
   const protocol = request.connection.encrypted ? 'https' : 'http';
   const parsedUrl = new URL(request.url, `${protocol}://${request.headers.host}`);
+
   if (parsedUrl.searchParams.get('valid') === 'true') {
     responseJson.message = 'This request has the required parameters';
     return respond(request, response, 200, responseJson, 'application/json');
   }
 
-  // console.log(request.headers.accept);
-  // const responseJson = {
-  //   message: 'Missing valid query parameter set to true',
-  //   id: 'bad request',
-  // };
-
-  // if (valid) {
-
-  // }
-
+  //filling in response for when valid isn't true
   responseJson.message = 'Missing valid query parameter set to true';
   responseJson.id = 'bad request';
 
@@ -68,18 +65,18 @@ const badRequest = (request, response) => {
 };
 
 const unauthorized = (request, response) => {
+  //setting up response and checking if loggedIn === 'yes'
   const responseJson = {};
   const protocol = request.connection.encrypted ? 'https' : 'http';
   const parsedUrl = new URL(request.url, `${protocol}://${request.headers.host}`);
+
+  //response for if loggedIn === 'yes'
   if (parsedUrl.searchParams.get('loggedIn') === 'yes') {
     responseJson.message = 'You have successfully viewed the content';
     return respond(request, response, 200, responseJson, 'application/json');
   }
-  // const responseJson = {
-  //   message: 'Missing loggedIn query parameter set to yes',
-  //   id: 'unauthorized',
-  // };
 
+  //filling in response for when loggedIn != 'yes'
   responseJson.message = 'Missing loggedIn query parameter set to yes';
   responseJson.id = 'unauthorized';
 
